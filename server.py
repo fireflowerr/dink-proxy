@@ -22,10 +22,6 @@ from typing import Callable
 import requests
 from flask import Flask, jsonify, request
 
-# ---------------------------------------------------------------------------
-# Cache
-# ---------------------------------------------------------------------------
-
 
 # ---------------------------------------------------------------------------
 # Config
@@ -455,4 +451,4 @@ if __name__ == "__main__":
 
     port = int(os.environ.get("PORT", 5000))
     log.info("Starting dink-proxy on port %d", port)
-    app.run(host="0.0.0.0", port=port, debug=True)
+    app.run(host="0.0.0.0", port=port)
