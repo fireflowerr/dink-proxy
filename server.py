@@ -130,7 +130,7 @@ def _dink_style_handler(payload: dict) -> dict:
 
 
 @_register_dink_handler
-def _dink_look_handler(payload: dict) -> dict | None:
+def _dink_loot_handler(payload: dict) -> dict | None:
     """Normalize loot embeds."""
     dink_type = payload.get('type', '')
     if dink_type != 'LOOT':
@@ -144,15 +144,17 @@ def _dink_look_handler(payload: dict) -> dict | None:
         name = item['name']
         raw_link = 'https://oldschool.runescape.wiki/w/Special:Search?' + parse.urlencode({'search': name})
         link = f'[{name}]({raw_link})'
-        quantity = item['quantity']
-        value = item['priceEach']
+        quantity = item.get('quantity', 1)
+        value = item.get('priceEach')
+        rarity = item.get('rarity')
 
-        if value < 600000:
-            continue
+        if value is not None and value >= 600000:
+            should_send = True
+            pretty_value = f'{value:,}'
+            description += f'• {quantity} x {link} ({pretty_value})\n'
 
-        should_send = True
-        pretty_value = f'{value:,}'
-        description += f'• {quantity} x {link} ({pretty_value})\n'
+        if not should_send and rarity is not None and float(rarity) <= 1/128:
+            should_send = True
 
     if not should_send:
         return None
