@@ -8,7 +8,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy source
 COPY server.py .
-COPY dink.json .
 
 EXPOSE 5000
 

@@ -18,6 +18,7 @@ import json
 import logging
 import os
 from typing import Callable
+from urllib import parse
 
 import requests
 from flask import Flask, jsonify, request
@@ -72,8 +73,6 @@ def handler(fn=None, *, priority: int = 0):
 
 dink_config: dict | None = None
 
-
-DINK_CONFIG_PATH = os.environ.get("DINK_CONFIG", "dink.json")
 
 # Set of valid NotificationType enum names from DinkPlugin (hardcoded for
 # fast detection without touching the filesystem).
@@ -143,7 +142,8 @@ def _dink_look_handler(payload: dict) -> dict | None:
     should_send: bool = False
     for item in items:
         name = item['name']
-        link = f'[{name}](https://oldschool.runescape.wiki/w/Special:Search?search={name})'
+        raw_link = 'https://oldschool.runescape.wiki/w/Special:Search?' + parse.urlencode({'search': name})
+        link = f'[{name}]({raw_link})'
         quantity = item['quantity']
         value = item['priceEach']
 
@@ -151,7 +151,8 @@ def _dink_look_handler(payload: dict) -> dict | None:
             continue
 
         should_send = True
-        description += f'• {quantity} x {link} ({value})\n'
+        pretty_value = f'{value:,}'
+        description += f'• {quantity} x {link} ({pretty_value})\n'
 
     if not should_send:
         return None
@@ -170,16 +171,20 @@ def _load_dink_config() -> dict:
     if dink_config is not None:
         return dink_config
 
-    if not os.path.exists(DINK_CONFIG_PATH):
-        log.warning("Dink config file '%s' not found.", DINK_CONFIG_PATH)
-        return {}
-    try:
-        with open(DINK_CONFIG_PATH, encoding="utf-8") as f:
-            dink_config = json.load(f)
-            return dink_config if dink_config is not None else {}
-    except (json.JSONDecodeError, OSError) as exc:
-        log.error("Failed to load dink config: %s", exc)
-        return {}
+    tmp = {}
+
+    value: str | None = None
+    value = os.environ.get('DINK_DEFAULT_HOOK')
+    if value is not None:
+        tmp['DEFAULT'] = value
+
+    for dink_type in _ALLOWED_DINK_TYPES:
+        value = os.environ.get(f'DINK_{dink_type}_HOOK')
+        if value is not None:
+            tmp[dink_type] = value
+
+    dink_config = tmp
+    return tmp
 
 
 # ---------------------------------------------------------------------------

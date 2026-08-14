@@ -4,9 +4,8 @@ services:
     ports:
       - "127.0.0.1:5000:5000"
     environment:
-      - DINK_CONFIG=/app/dink.json
-      - DISCORD_DEFAULT_URL=
+      - DINK_DEFAULT_HOOK=
       - PORT=5000
-    volumes:
-      - ./dink.json:/app/dink.json
     restart: unless-stopped
+    env_file:
+      - .env
