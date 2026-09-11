@@ -1,0 +1,13 @@
+# Secrets — never commit
+.env
+
+# Config - default is generated
+config.toml
+
+# Python
+__pycache__/
+.venv/
+*.egg-info/
+
+# IDE
+.idea/
