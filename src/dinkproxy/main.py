@@ -13,10 +13,19 @@ from dinkproxy.handler.simple import handler as simple_handler
 from dinkproxy.handler.style import handler as style_handler
 from dinkproxy.types import DinkType
 
+# Boot logging: fixed and config-independent, so the messages emitted while loading
+# the config below are formatted too.
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s  %(levelname)-8s  %(message)s',
 )
+
+config = get_config()
+
+# Apply the configured level explicitly now that it is known. Deliberately not a
+# second basicConfig() call: that is a no-op when the root logger already has
+# handlers, and its level= argument sits inside that same guard.
+logging.getLogger().setLevel(config.log_level)
 
 log = logging.getLogger(__name__)
 
@@ -28,18 +37,19 @@ app.register(group_storage, [DinkType.GROUP_STORAGE])
 app.register(
     simple_handler,
     [
-        DinkType.ACHIEVEMENT_DIARY,
+        DinkType.CLUE,
         DinkType.COLLECTION,
-        DinkType.COMBAT_ACHIEVEMENT,
         DinkType.DEATH,
+        DinkType.PET,
+        DinkType.COMBAT_ACHIEVEMENT,
+        DinkType.ACHIEVEMENT_DIARY,
+        DinkType.PLAYER_KILL,
         DinkType.LEVEL,
     ],
 )
 
 
 server = Flask(__name__)
-
-config = get_config()
 
 
 @server.route('/health', methods=['GET'])
@@ -91,7 +101,7 @@ def hook():
         return '', 204
 
     notification_type = outgoing.get('type')
-    target_url = os.environ.get(f'DINK_{notification_type}_HOOK') or os.environ.get('DINK_DEFAULT_HOOK')
+    target_url = os.environ.get(f'DINK_{notification_type}_HOOK', os.environ.get('DINK_DEFAULT_HOOK'))
     if target_url is None:
         log.error('No webhook configured for notification type %s', notification_type)
         return jsonify({'error': f'no webhook configured for type {notification_type}'}), 500
@@ -134,6 +144,7 @@ def _serve_with_gunicorn(flask_app) -> None:
         'threads': config.server.threads,
         'timeout': config.server.worker_timeout,
         'workers': config.server.workers,
+        'loglevel': logging.getLevelName(config.log_level).lower(),
     }
 
     log.info(
