@@ -1,12 +1,12 @@
 [build-system]
-requires = ["setuptools>=68"]
-build-backend = "setuptools.build_meta"
+requires = ["uv_build>=0.12.13,<0.13.0"]
+build-backend = "uv_build"
 
 [project]
 name = "dink-proxy"
-version = "0.1.0"
+version = "0.1.1"
 description = "DinkProxy - webhook interception & dynamic routing proxy"
-requires-python = ">=3.12"
+requires-python = ">=3.14"
 dependencies = [
     "flask>=3.0",
     "pydantic>=2.13",
@@ -14,9 +14,23 @@ dependencies = [
     "werkzeug>=3.1",
 ]
 
-[tool.setuptools.packages.find]
-where = ["src"]
-include = ["dinkproxy*"]
-
-[project.optional-dependencies]
+[dependency-groups]
+dev = ["ruff>=0.16"]
 prod = ["gunicorn>=26"]
+
+[tool.uv]
+# `dev` and `prod` together form the default environment. The image drops `dev`
+# and keeps `prod` via `--no-dev --group prod`.
+default-groups = ["dev", "prod"]
+
+[tool.uv.build-backend]
+# The distribution is "dink-proxy" but the import package is "dinkproxy".
+module-name = "dinkproxy"
+
+[tool.ruff]
+target-version = "py314"
+line-length = 120
+src = ["src"]
+
+[tool.ruff.format]
+quote-style = "single"

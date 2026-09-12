@@ -1,6 +1,6 @@
 import logging
-from dinkproxy.types import DinkHandler, DinkType
 
+from dinkproxy.types import DinkHandler, DinkType
 
 log = logging.getLogger(__name__)
 
@@ -31,13 +31,16 @@ class DinkApp:
         notification_type = payload.get('type')
         for index, registration in enumerate(self._handlers):
             handler, notifications = registration
-            if payload is None:
-                return None
-
             # noinspection broad-exception
             try:
                 if notifications is None or notification_type in notifications:
+                    # noinspection bad-argument-type
                     payload = handler(payload)
+
+                    if payload is None:
+                        log.debug('payload rejected [handlerIdx: %d]', index)
+                        return None
+
             except Exception:
                 log.exception('failed to handle payload [handlerIdx: %d]', index)
 

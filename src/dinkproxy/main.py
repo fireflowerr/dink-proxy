@@ -3,21 +3,19 @@ import logging
 import os
 
 import requests
+from flask import Flask, jsonify, request
 
-from dinkproxy.config import get_config, Deployment
-from dinkproxy.types import DinkType
+from dinkproxy.app import DinkApp
+from dinkproxy.config import Deployment, get_config
+from dinkproxy.handler.group_storage import handler as group_storage
 from dinkproxy.handler.loot import handler as loot_handler
 from dinkproxy.handler.simple import handler as simple_handler
 from dinkproxy.handler.style import handler as style_handler
-from dinkproxy.handler.group_storage import handler as group_storage
-
-from flask import jsonify, request, Flask
-
-from dinkproxy.app import DinkApp
+from dinkproxy.types import DinkType
 
 logging.basicConfig(
     level=logging.INFO,
-    format="%(asctime)s  %(levelname)-8s  %(message)s",
+    format='%(asctime)s  %(levelname)-8s  %(message)s',
 )
 
 log = logging.getLogger(__name__)
@@ -27,20 +25,24 @@ app = DinkApp()
 app.register(style_handler)
 app.register(loot_handler, [DinkType.LOOT])
 app.register(group_storage, [DinkType.GROUP_STORAGE])
-app.register(simple_handler, [
-    DinkType.ACHIEVEMENT_DIARY,
-    DinkType.COLLECTION,
-    DinkType.COMBAT_ACHIEVEMENT,
-    DinkType.DEATH,
-    DinkType.LEVEL,
-])
+app.register(
+    simple_handler,
+    [
+        DinkType.ACHIEVEMENT_DIARY,
+        DinkType.COLLECTION,
+        DinkType.COMBAT_ACHIEVEMENT,
+        DinkType.DEATH,
+        DinkType.LEVEL,
+    ],
+)
 
 
 server = Flask(__name__)
 
 config = get_config()
 
-@server.route('/heatlh', methods=['GET'])
+
+@server.route('/health', methods=['GET'])
 def health():
     """
     Health check endpoint.
@@ -91,10 +93,9 @@ def hook():
     notification_type = outgoing.get('type')
     target_url = os.environ.get(f'DINK_{notification_type}_HOOK') or os.environ.get('DINK_DEFAULT_HOOK')
     if target_url is None:
-        log.error("No webhook configured for notification type %s", notification_type)
+        log.error('No webhook configured for notification type %s', notification_type)
         return jsonify({'error': f'no webhook configured for type {notification_type}'}), 500
 
-    global config
     server_config = config.server
     try:
         if request.files:
@@ -113,21 +114,20 @@ def hook():
                 json=outgoing,
                 timeout=server_config.simple_timeout,
             )
-    except requests.RequestException as exc:
-        log.exception("Could not forward the notification to Discord")
+    except requests.RequestException:
+        log.exception('Could not forward the notification to Discord')
         return '', 502
 
     if response.status_code >= 400:
-        log.error("Discord rejected the payload (%d): %s", response.status_code, response.text[:200])
+        log.error('Discord rejected the payload (%d): %s', response.status_code, response.text[:200])
         return jsonify({'error': 'discord rejected the payload', 'discord_status': response.status_code}), 502
 
-    log.info("Forwarded %s notification to Discord (%d)", notification_type, response.status_code)
+    log.info('Forwarded %s notification to Discord (%d)', notification_type, response.status_code)
     return jsonify({'status': 'forwarded', 'discord_status': response.status_code}), 200
 
 
 def _serve_with_gunicorn(flask_app) -> None:
     from gunicorn.app.base import BaseApplication
-    global config
 
     options = {
         'bind': f'{config.server.host}:{config.server.port}',
@@ -137,8 +137,10 @@ def _serve_with_gunicorn(flask_app) -> None:
     }
 
     log.info(
-        "Starting dinkproxy on %s (workers=%d, threads=%d)",
-        options['bind'], options['workers'], options['threads'],
+        'Starting dinkproxy on %s (workers=%d, threads=%d)',
+        options['bind'],
+        options['workers'],
+        options['threads'],
     )
 
     class _Application(BaseApplication):
@@ -154,9 +156,8 @@ def _serve_with_gunicorn(flask_app) -> None:
 
 
 if __name__ == '__main__':
-    global config
     if config.server.deployment == Deployment.PROD:
         _serve_with_gunicorn(server)
     else:
-        log.info("Starting dinkproxy on %s", f'{config.server.host}:{config.server.port}')
+        log.info('Starting dinkproxy on %s', f'{config.server.host}:{config.server.port}')
         server.run(host=config.server.host, port=config.server.port)

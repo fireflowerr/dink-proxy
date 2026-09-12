@@ -8,6 +8,9 @@ config.toml
 __pycache__/
 .venv/
 *.egg-info/
+build/
+dist/
+.ruff_cache/
 
 # IDE
 .idea/

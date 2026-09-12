@@ -1,5 +1,7 @@
-from dinkproxy.types import DinkHandler
 from dinkproxy.config import get_config
+from dinkproxy.types import DinkHandler
+from dinkproxy.util.colors import set_color
+
 
 def _handler(payload: dict) -> dict:
     """
@@ -10,7 +12,7 @@ def _handler(payload: dict) -> dict:
     """
     embeds: list[dict] = payload.get('embeds', [])
     for embed in embeds:
-        embed['color'] = get_config().color
+        set_color(embed, get_config().color)
         del embed['footer']
         del embed['timestamp']
 

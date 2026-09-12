@@ -1,5 +1,6 @@
 from dinkproxy.types import DinkHandler
 
+
 def _handler(payload: dict) -> dict:
     """
     Simple handler.

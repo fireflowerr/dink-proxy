@@ -1,13 +1,14 @@
-import tomllib
 import logging
+import tomllib
 from pathlib import Path
-from pydantic import BaseModel, Field
 
+from pydantic import BaseModel, Field, ValidationError
 
 log = logging.getLogger(__name__)
 
 
-from enum import Enum, auto
+from enum import Enum
+
 
 class Deployment(Enum):
     DEV = 'dev'
@@ -15,7 +16,7 @@ class Deployment(Enum):
 
 
 class _CommonConfig(BaseModel):
-    color: int = Field(default=0)
+    color: int | None = Field(default=None)
 
 
 class LootConfig(_CommonConfig):
@@ -34,7 +35,7 @@ class ServerConfig(BaseModel):
     workers: int = Field(default=2)
     threads: int = Field(default=4)
     simple_timeout: int = Field(default=10)
-    complex_timeout : int = Field(default=30)
+    complex_timeout: int = Field(default=30)
     worker_timeout: int = Field(default=33)
 
 
@@ -47,7 +48,11 @@ class Config(_CommonConfig):
     def load(config_path: str) -> Config:
         with open(config_path, 'rb') as handle:
             data = tomllib.load(handle)
-            return Config.model_validate(data)
+            try:
+                return Config.model_validate(data, extra='forbid')
+            except ValidationError:
+                log.exception('Failed to validate config.toml, using default config')
+                return Config()
 
 
 config: Config | None = None
@@ -60,7 +65,7 @@ def get_config() -> Config:
         if path.exists():
             config = Config.load('config.toml')
         else:
-            log.warning(f'config.toml not found, using default config')
+            log.warning('config.toml not found, using default config')
             config = Config()
 
     return config

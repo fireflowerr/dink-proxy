@@ -1,6 +1,9 @@
 from urllib import parse
-from dinkproxy.types import DinkHandler
+
 from dinkproxy.config import get_config
+from dinkproxy.types import DinkHandler
+from dinkproxy.util.colors import set_color
+
 
 def _handler(payload: dict) -> dict | None:
     """
@@ -35,9 +38,10 @@ def _handler(payload: dict) -> dict | None:
         return None
 
     embeds: list[dict] = payload.get('embeds', [])
-    embed = embeds[0]
-    embed['description'] = description
-    del embed['fields']
+    for embed in embeds:
+        embed['description'] = description
+        del embed['fields']
+        set_color(embed, config.loot.color)
 
     return payload
 

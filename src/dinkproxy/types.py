@@ -1,14 +1,14 @@
+from collections.abc import Callable
 from enum import Enum, auto
-from typing import Callable
 
-
-type DinkHandler =  Callable[[dict], dict | None]
+type DinkHandler = Callable[[dict], dict | None]
 
 
 class DinkType(Enum):
     """
     Dink notification types.
     """
+
     CLUE = auto()
     COLLECTION = auto()
     DEATH = auto()

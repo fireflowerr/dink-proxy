@@ -4,3 +4,7 @@ __pycache__
 .git
 *.pyc
 .env
+build
+dist
+.ruff_cache
+*.egg-info
