@@ -45,12 +45,13 @@ class DinkApp:
                     log.debug('payload received by [handlerIdx: %d]', index)
                     handled = handled or has_notifications
 
-                    # noinspection bad-argument-type
-                    payload = handler(payload)
+                    next_payload = handler(payload)
 
-                    if payload is None:
+                    if next_payload is None:
                         log.debug('payload rejected [handlerIdx: %d]', index)
                         return None
+
+                    payload = next_payload
 
             except Exception:
                 log.exception('failed to handle payload [handlerIdx: %d]', index)

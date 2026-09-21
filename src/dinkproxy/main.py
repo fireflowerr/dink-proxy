@@ -156,9 +156,17 @@ def _serve_with_gunicorn(flask_app) -> None:
 
     class _Application(BaseApplication):
         def load_config(self) -> None:
+            if self.cfg is None:
+                log.info('No config file found, using defaults')
+                return
+
+            gunicorn_config = self.cfg
+
             for key, value in options.items():
-                if key in self.cfg.settings and value is not None:
+                if key in gunicorn_config.settings and value is not None:
                     self.cfg.set(key.lower(), value)
+
+            return
 
         def load(self):
             return flask_app

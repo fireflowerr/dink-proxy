@@ -6,3 +6,10 @@ services:
     restart: unless-stopped
     env_file:
       - .env
+    configs:
+      - source: dink_config
+        target: /app/config.toml
+
+configs:
+  dink_config:
+    file: ./config.toml

@@ -15,7 +15,10 @@ dependencies = [
 ]
 
 [dependency-groups]
-dev = ["ruff>=0.16"]
+dev = [
+    "ruff>=0.16",
+    "ty>=0.0.82",
+]
 prod = ["gunicorn>=26"]
 
 [tool.uv]

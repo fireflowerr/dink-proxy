@@ -82,7 +82,7 @@ def get_config() -> Config:
     global config
     if config is None:
         path = Path('config.toml')
-        if path.exists():
+        if path.is_file():
             config = Config.load('config.toml')
         else:
             log.warning('config.toml not found, using default config')
