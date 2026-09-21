@@ -1,0 +1,31 @@
+# dink-proxy runtime configuration.
+#
+# Every setting is optional. The values shown
+# are the built-in defaults. To override one, uncomment its line by removing the
+# leading '#' (leave any trailing '#' comment in place).
+
+# Default embed color for every notification, as an integer (0xRRGGBB); if unset
+# keeps whatever color Discord/the plugin sent.
+# color = 0x2ECC71
+
+# log_level = "INFO"   # Log level, as a name ("DEBUG", "INFO", ...) or its numeric value.
+
+# [loot]
+# min_value = 0        # only forward an item worth at least this many coins
+# min_rarity = 0.0     # or one whose rarity is <= this (lower rarity value = rarer)
+# color = 0x2ECC71     # embed color for loot notifications
+
+# [group]
+# allowlist = []       # player names to forward; left empty, every group event is dropped
+# color = 0x2ECC71     # embed color for group storage notifications
+
+# [server]
+# host = "0.0.0.0"
+# port = 5000
+# deployment = "prod"   # "dev" = Flask's dev server, "prod" = gunicorn
+# workers = 2           # gunicorn worker processes
+# threads = 4           # threads per worker
+# simple_timeout = 10   # seconds allowed to forward a JSON-only notification
+# complex_timeout = 30  # seconds allowed to forward a notification carrying files
+# worker_timeout = 33   # gunicorn worker timeout; keep it above complex_timeout
+
