@@ -45,6 +45,12 @@ class GroupConfig(_CommonConfig):
     allowlist: list[str] = Field(default=[])
 
 
+class LevelConfig(_CommonConfig):
+    every_10: int | None = Field(default=None)
+    every_5: int | None = Field(default=None)
+    every_1: int | None = Field(default=None)
+
+
 class ServerConfig(BaseModel):
     host: str = Field(default='0.0.0.0')
     port: int = Field(default=5000)
@@ -59,6 +65,7 @@ class ServerConfig(BaseModel):
 class Config(_CommonConfig):
     loot: LootConfig = Field(default_factory=LootConfig)
     group: GroupConfig = Field(default_factory=GroupConfig)
+    level: LevelConfig = Field(default_factory=LevelConfig)
     server: ServerConfig = Field(default_factory=ServerConfig)
     log_level: LogLevel = Field(default=logging.INFO)
 

@@ -19,6 +19,12 @@
 # allowlist = []       # player names to forward; left empty, every group event is dropped
 # color = 0x2ECC71     # embed color for group storage notifications
 
+# [level]
+# every_10 = 50        # forward a level-up when the level is a multiple of 10 starting at level 50
+# every_5 = 75         # forward a level-up when the level is a multiple of 5 starting at level 75
+# every_1 = 90         # forward a level-up when the level is a multiple of 1 starting at level 90
+# color = 0x2ECC71     # embed color for level notifications
+
 # [server]
 # host = "0.0.0.0"
 # port = 5000

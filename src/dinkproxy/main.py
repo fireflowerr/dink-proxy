@@ -8,6 +8,7 @@ from flask import Flask, jsonify, request
 from dinkproxy.app import DinkApp
 from dinkproxy.config import Deployment, get_config
 from dinkproxy.handler.group_storage import handler as group_storage
+from dinkproxy.handler.level import handler as level_handler
 from dinkproxy.handler.loot import handler as loot_handler
 from dinkproxy.handler.simple import handler as simple_handler
 from dinkproxy.handler.style import handler as style_handler
@@ -34,6 +35,7 @@ app = DinkApp()
 app.register(style_handler)
 app.register(loot_handler, [DinkType.LOOT])
 app.register(group_storage, [DinkType.GROUP_STORAGE])
+app.register(level_handler, [DinkType.LEVEL])
 app.register(
     simple_handler,
     [
