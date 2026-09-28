@@ -34,4 +34,3 @@
 # simple_timeout = 10   # seconds allowed to forward a JSON-only notification
 # complex_timeout = 30  # seconds allowed to forward a notification carrying files
 # worker_timeout = 33   # gunicorn worker timeout; keep it above complex_timeout
-

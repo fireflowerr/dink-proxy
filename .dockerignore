@@ -3,7 +3,7 @@
 __pycache__
 .git
 *.pyc
-.env
+default/.env
 build
 dist
 .ruff_cache
